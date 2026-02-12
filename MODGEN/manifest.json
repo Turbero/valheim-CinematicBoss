@@ -1,0 +1,9 @@
+{
+  "name": "CinematicBoss",
+  "version_number": "1.0.0",
+  "website_url": "https://github.com/Turbero/valheim-CinematicBoss",
+  "description": "Creates a cinematic cutscene effect when any boss offering is used.",
+  "dependencies": [
+    "denikson-BepInExPack_Valheim-5.4.2333"
+  ]
+}
