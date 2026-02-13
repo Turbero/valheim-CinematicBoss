@@ -198,13 +198,13 @@ namespace CinematicBoss
             Transform cam = __instance.transform;
 
             Patch.Timer += Time.deltaTime;
-            float duration = ConfigurationFile.cameraGoesBackToPlayerDuration.Value;
 
             switch (Patch.State)
             {
                 case Patch.CinematicState.MovingToBossSpawnPos:
 
-                    float t = Patch.Timer / ConfigurationFile.cameraGoesToBossDuration.Value;
+                    float moveDuration = Mathf.Max(0.01f, ConfigurationFile.cameraGoesToBossDuration.Value);
+                    float t = Patch.Timer / moveDuration;
 
                     cam.position = Vector3.Lerp(Patch.StartPos, Patch.TargetPos, t);
                     cam.rotation = Quaternion.Slerp(Patch.StartRot, Patch.TargetRot, t);
@@ -226,7 +226,9 @@ namespace CinematicBoss
                     {
                         Patch.BossInstance =
                             Object.FindObjectsByType<Character>(FindObjectsSortMode.None)
-                            .FirstOrDefault(c => c.m_boss);
+                                .Where(c => c.m_boss)
+                                .OrderBy(c => Vector3.Distance(c.transform.position, Patch.SpawnPoint))
+                                .FirstOrDefault();
                     }
 
                     if (Patch.BossInstance)
@@ -240,8 +242,13 @@ namespace CinematicBoss
                 case Patch.CinematicState.LookingAtBoss:
 
                     cam.position = Patch.TargetPos;
+                    if (Patch.BossInstance)
+                    {
+                        Vector3 lookDir = Patch.BossInstance.transform.position - cam.position;
+                        cam.rotation = Quaternion.LookRotation(lookDir);
+                    }
 
-                    if (Patch.Timer >= duration)
+                    if (Patch.Timer >= ConfigurationFile.waitAtBossCameraPosition.Value)
                     {
                         Patch.Timer = 0f;
                         Patch.State = Patch.CinematicState.Returning;
