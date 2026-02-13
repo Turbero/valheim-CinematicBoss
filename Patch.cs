@@ -149,7 +149,7 @@ namespace CinematicBoss
                 return;
 
             float targetHeight = letterboxActive
-                ? Screen.height * (ConfigurationFile.targetHeightPercent.Value / 100f)
+                ? Screen.height * (ConfigurationFile.letterBoxHeightPercent.Value / 100f)
                 : 0f;
 
             // Stateless soft interpolation
@@ -204,7 +204,7 @@ namespace CinematicBoss
             {
                 case Patch.CinematicState.MovingToAltar:
 
-                    float t = Patch.Timer / 2f;
+                    float t = Patch.Timer / ConfigurationFile.cameraGoesToBossDuration.Value;
 
                     cam.position = Vector3.Lerp(Patch.StartPos, Patch.TargetPos, t);
                     cam.rotation = Quaternion.Slerp(Patch.StartRot, Patch.TargetRot, t);

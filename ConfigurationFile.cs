@@ -15,7 +15,7 @@ namespace CinematicBoss
         public static ConfigEntry<float> cameraGoesBackToPlayerDuration;
         public static ConfigEntry<float> cameraGoesToBossDuration;
         public static ConfigEntry<float> letterBoxDuration;
-        public static ConfigEntry<float> targetHeightPercent;
+        public static ConfigEntry<float> letterBoxHeightPercent;
 
         private static ConfigFile configFile;
         private static readonly string ConfigFileName = CinematicBoss.GUID + ".cfg";
@@ -38,9 +38,9 @@ namespace CinematicBoss
 
                 debug = config("1 - General", "DebugMode", false, "Enabling/Disabling the debugging in the console (default = false)", false);
                 cameraGoesBackToPlayerDuration = config("2 - Cinematic Config", "Camera goes back to player duration (seconds)", 1.5f, "Duration of the camera movement back to the player after the boss shows up on the ground");
-                cameraGoesToBossDuration = config("2 - Cinematic Config", "Camera goes to boss (seconds)", 5f, "Duration of the camera movement going to the boss position where it will appear in the world after the offering is done");
+                cameraGoesToBossDuration = config("2 - Cinematic Config", "Camera goes to boss (seconds)", 10f, "Duration of the camera movement going to the boss position where it will appear in the world after the offering is done");
                 letterBoxDuration = config("2 - Cinematic Config", "Letter Box duration (seconds)", 2f, "Duration of the black area up and down on the screen when an offering is accepted and the boss shows up on the ground");
-                targetHeightPercent = config("2 - Cinematic Config", "Letter Box Relative Size (percentage)", 6f, "Size in percentage of the screen that the black area of the letter box will cover");
+                letterBoxHeightPercent = config("2 - Cinematic Config", "Letter Box Relative Size (percentage)", 6f, new ConfigDescription("Size in percentage of the screen that the black area of the letter box will cover", new AcceptableValueRange<float>(0f, 100f)));
                 SetupWatcher();
             }
         }
