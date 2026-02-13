@@ -10,7 +10,7 @@ namespace CinematicBoss
         public enum CinematicState
         {
             Inactive,
-            MovingToAltar,
+            MovingToBossSpawnPos,
             WaitingForBoss,
             LookingAtBoss,
             Returning
@@ -54,7 +54,7 @@ namespace CinematicBoss
             TargetRot = Quaternion.LookRotation(spawnPoint - TargetPos);
 
             Timer = 0f;
-            State = CinematicState.MovingToAltar;
+            State = CinematicState.MovingToBossSpawnPos;
 
             HideHud(true);
             EnableLetterbox(true);
@@ -202,7 +202,7 @@ namespace CinematicBoss
 
             switch (Patch.State)
             {
-                case Patch.CinematicState.MovingToAltar:
+                case Patch.CinematicState.MovingToBossSpawnPos:
 
                     float t = Patch.Timer / ConfigurationFile.cameraGoesToBossDuration.Value;
 
@@ -254,6 +254,7 @@ namespace CinematicBoss
                     float r = Patch.Timer / 1.5f;
 
                     cam.position = Vector3.Lerp(Patch.TargetPos, Patch.StartPos, r);
+                    cam.rotation = Quaternion.Slerp(Patch.TargetRot, Patch.StartRot, r);
 
                     if (r >= 1f)
                         Patch.EndCinematic();
