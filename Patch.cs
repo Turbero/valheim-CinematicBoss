@@ -34,8 +34,6 @@ namespace CinematicBoss
         private static RectTransform topBar;
         private static RectTransform bottomBar;
 
-        private static float targetHeightPercent = ConfigurationFile.targetHeightPercent.Value / 100f;
-        private static float animationDuration = ConfigurationFile.letterBoxDuration.Value;
         private static float currentHeight = 0f;
         private static bool letterboxActive = false;
 
@@ -58,41 +56,17 @@ namespace CinematicBoss
             Timer = 0f;
             State = CinematicState.MovingToAltar;
 
-            ApplyPlayerLock(true);
             HideHud(true);
             EnableLetterbox(true);
         }
 
         public static void EndCinematic()
         {
-            ApplyPlayerLock(false);
             HideHud(false);
             EnableLetterbox(false);
 
             State = CinematicState.Inactive;
             BossInstance = null;
-        }
-
-        // --------------------------------------------------
-        // PLAYER LOCK
-        // --------------------------------------------------
-
-        public static void ApplyPlayerLock(bool locked)
-        {
-            /*if (ZInput.instance != null)
-                ZInput.instance.BlockInput(locked);*/
-
-            if (!Player.m_localPlayer)
-                return;
-
-            if (locked)
-            {
-                Player.m_localPlayer.SetControls(
-                    Vector3.zero,
-                    false, false, false, false,
-                    false, false, false, false,
-                    false, false);
-            }
         }
 
         public static void HideHud(bool hide)
@@ -175,11 +149,11 @@ namespace CinematicBoss
                 return;
 
             float targetHeight = letterboxActive
-                ? Screen.height * targetHeightPercent
+                ? Screen.height * (ConfigurationFile.targetHeightPercent.Value / 100f)
                 : 0f;
 
-            // Interpolación suave independiente del estado
-            float lerpSpeed = Time.deltaTime / animationDuration;
+            // Stateless soft interpolation
+            float lerpSpeed = Time.deltaTime / ConfigurationFile.letterBoxDuration.Value;
 
             currentHeight = Mathf.Lerp(currentHeight, targetHeight, lerpSpeed);
 
@@ -189,7 +163,7 @@ namespace CinematicBoss
             if (bottomBar != null)
                 bottomBar.sizeDelta = new Vector2(0f, currentHeight);
 
-            // Apagado seguro cuando casi llega a 0
+            // Safe turn off when almost 0
             if (!letterboxActive && currentHeight < 0.5f)
             {
                 currentHeight = 0f;
@@ -215,7 +189,7 @@ namespace CinematicBoss
     {
         static bool Prefix(GameCamera __instance)
         {
-            // Siempre animamos barras aunque la cinemática haya terminado
+            // Always animate bars even when cinematic has been completed
             Patch.AnimateLetterbox();
 
             if (Patch.State == Patch.CinematicState.Inactive)
@@ -291,6 +265,9 @@ namespace CinematicBoss
         }
     }
 
+    // --------------------------------------------------
+    // PLAYER LOCK
+    // --------------------------------------------------
     [HarmonyPatch(typeof(Player), nameof(Player.InCutscene))]
     public static class Player_InCutscene_Patch
     {
