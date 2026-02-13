@@ -8,7 +8,7 @@ namespace CinematicBoss
 {
     internal class ConfigurationFile
     {
-        private static ConfigEntry<bool> _serverConfigLocked = null;
+        //private static ConfigEntry<bool> _serverConfigLocked = null;
 
         public static ConfigEntry<bool> debug;
 
