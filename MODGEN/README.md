@@ -1,11 +1,18 @@
 # Cinematic Boss
 
-Cinematic Boss is a mod that TBD
+Cinematic Boss is a mod that allows you to add a cinematic cool effect when you use a boss offering in the altar.
 
+![](https://i.imgur.com/aC4fSC5.gif)
+
+IMPORTANT: Only the player that makes the offering will receive the cutscene (multiplayer support soon!)
 
 ## Usage instructions
 
-TBD
+There is a default configuration set to be used for a cool boss cutscene without touching the .cfg file.
+
+![](https://i.imgur.com/yLTOVbM.png)
+
+Any change here will impact that effect in different ways, so feel free to experiment!
 
 ## About myself
 

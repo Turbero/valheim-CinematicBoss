@@ -33,8 +33,8 @@ namespace CinematicBoss
             {
                 configFile = plugin.Config;
 
-                _serverConfigLocked = config("1 - General", "Lock Configuration", true, "If on, the configuration is locked and can be changed by server admins only.");
-                _ = ConfigSync.AddLockingConfigEntry(_serverConfigLocked);
+                //_serverConfigLocked = config("1 - General", "Lock Configuration", true, "If on, the configuration is locked and can be changed by server admins only.");
+                //_ = ConfigSync.AddLockingConfigEntry(_serverConfigLocked);
                 debug = config("1 - General", "DebugMode", false, "Enabling/Disabling the debugging in the console (default = false)", false);
                 
                 cameraGoesToBossDuration = config("2 - Cinematic Camera", "Camera goes from player to boss (seconds)", 10f, "Duration of the camera movement going to the boss position where it will appear in the world after the offering is done");
@@ -87,8 +87,8 @@ namespace CinematicBoss
         {
             ConfigDescription extendedDescription =
                 new ConfigDescription(
-                    description.Description +
-                    (synchronizedSetting ? " [Synced with Server]" : " [Not Synced with Server]"),
+                    description.Description /*+
+                    (synchronizedSetting ? " [Synced with Server]" : " [Not Synced with Server]")*/,
                     description.AcceptableValues, description.Tags);
             ConfigEntry<T> configEntry = configFile.Bind(group, name, value, extendedDescription);
             //var configEntry = Config.Bind(group, name, value, description);
