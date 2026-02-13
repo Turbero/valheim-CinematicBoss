@@ -12,7 +12,7 @@ namespace CinematicBoss
 
         public static ConfigEntry<bool> debug;
 
-        public static ConfigEntry<float> cameraGoesBackToPlayerDuration;
+        public static ConfigEntry<float> waitAtBossCameraPosition;
         public static ConfigEntry<float> cameraGoesToBossDuration;
         public static ConfigEntry<float> letterBoxDuration;
         public static ConfigEntry<float> letterBoxHeightPercent;
@@ -35,12 +35,12 @@ namespace CinematicBoss
 
                 _serverConfigLocked = config("1 - General", "Lock Configuration", true, "If on, the configuration is locked and can be changed by server admins only.");
                 _ = ConfigSync.AddLockingConfigEntry(_serverConfigLocked);
-
                 debug = config("1 - General", "DebugMode", false, "Enabling/Disabling the debugging in the console (default = false)", false);
-                cameraGoesBackToPlayerDuration = config("2 - Cinematic Config", "Camera goes back to player duration (seconds)", 1f, "Duration of the camera movement back to the player after the boss shows up on the ground");
-                cameraGoesToBossDuration = config("2 - Cinematic Config", "Camera goes to boss (seconds)", 10f, "Duration of the camera movement going to the boss position where it will appear in the world after the offering is done");
-                letterBoxDuration = config("2 - Cinematic Config", "Letter Box Duration (seconds)", 2f, "Duration of the black area up and down on the screen when an offering is accepted and the boss shows up on the ground");
-                letterBoxHeightPercent = config("2 - Cinematic Config", "Letter Box Relative Size (percentage)", 6f, new ConfigDescription("Size in percentage of the screen that the black area of the letter box will cover", new AcceptableValueRange<float>(0f, 100f)));
+                
+                cameraGoesToBossDuration = config("2 - Cinematic Camera", "Camera goes from player to boss (seconds)", 10f, "Duration of the camera movement going to the boss position where it will appear in the world after the offering is done");
+                waitAtBossCameraPosition = config("2 - Cinematic Camera", "Camera waits at boss (seconds)", 1f, "Time to wait at boss camera position after the boss spawns and before returning to the player");
+                letterBoxDuration = config("3 - Cinematic Letter Box", "Letter Box Duration (seconds)", 2f, "Duration of the black area up and down on the screen when an offering is accepted and the boss shows up on the ground");
+                letterBoxHeightPercent = config("3 - Cinematic Letter Box", "Letter Box Relative Size (percentage)", 6f, new ConfigDescription("Size in percentage of the screen that the black area of the letter box will cover", new AcceptableValueRange<float>(0f, 100f)));
                 SetupWatcher();
             }
         }
