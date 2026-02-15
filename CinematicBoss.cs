@@ -1,5 +1,7 @@
-﻿using BepInEx;
+﻿using System;
+using BepInEx;
 using HarmonyLib;
+using UnityEngine;
 
 namespace CinematicBoss
 {
@@ -18,10 +20,43 @@ namespace CinematicBoss
 
             harmony.PatchAll();
         }
+        
+        private void Start()
+        {
+            StartCoroutine(WaitForNetworking());
+        }
+
+        private System.Collections.IEnumerator WaitForNetworking()
+        {
+            // Wait until full networking initialization
+            while (ZRoutedRpc.instance == null || ZNet.instance == null)
+                yield return new WaitForSeconds(1f);
+            
+            // Commands registration
+            Commands.RegisterConsoleCommand();
+        }
 
         void onDestroy()
         {
             harmony.UnpatchSelf();
+        }
+    }
+    
+    class Commands
+    {
+        public static void RegisterConsoleCommand()
+        {
+            new Terminal.ConsoleCommand("remove_cutscene", "Rollback cutscene and move camera back to player", args =>
+            {
+                Patch.EndCinematic();
+            });
+        }
+    }
+    
+    [HarmonyPatch(typeof(Game), "Start")]
+    public class GameStartPatch {
+        private static void Prefix() {
+            ZRoutedRpc.instance.Register("RPC_CinematicPlayerNearby", new Action<long, ZPackage>(OfferingBowlPatch.RPC_CinematicPlayerNearby));
         }
     }
 }

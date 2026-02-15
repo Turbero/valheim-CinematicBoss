@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using System.Collections.Generic;
+using HarmonyLib;
 using System.Linq;
 using UnityEngine.UI;
 using UnityEngine;
@@ -43,6 +44,8 @@ namespace CinematicBoss
         {
             if (!Player.m_localPlayer || !GameCamera.instance)
                 return;
+            
+            Logger.Log("Cinematic started for player "+Player.m_localPlayer.GetPlayerName());
 
             SpawnPoint = spawnPoint;
 
@@ -67,6 +70,8 @@ namespace CinematicBoss
 
             State = CinematicState.Inactive;
             BossInstance = null;
+            
+            Logger.Log("Cinematic ended for player "+Player.m_localPlayer.GetPlayerName());
         }
 
         public static void HideHud(bool hide)
@@ -174,6 +179,34 @@ namespace CinematicBoss
         }
     }
 
+    [HarmonyPatch(typeof(OfferingBowl), "InitiateSpawnBoss")]
+    public static class InitiateSpawnBossPatch
+    {
+        static bool Prefix(OfferingBowl __instance, Vector3 point, bool removeItemsFromInventory)
+        {
+            if (ConfigurationFile.acceptOfferingWithMonstersAround.Value)
+                return true;
+            
+            //Detect monsters around
+            Logger.Log("Detecting monsters around "+ConfigurationFile.acceptOfferingWithMonstersAroundRange.Value + " meters...");
+
+            List<Character> charactersNearby = new List<Character>();
+            Vector3 playerPosition = Player.m_localPlayer.transform.position;
+            Character.GetCharactersInRange(playerPosition, ConfigurationFile.acceptOfferingWithMonstersAroundRange.Value, charactersNearby);
+
+            int countMonsters = charactersNearby.FindAll(c => c.IsMonsterFaction(Time.time)).Count;
+            if (countMonsters > 0)
+            {
+                Logger.Log(countMonsters + " monsters detected. Cancelling...");
+                Player.m_localPlayer.Message(MessageHud.MessageType.Center, "$msg_bedenemiesnearby");
+                return false;
+            }
+            
+            Logger.Log("No monsters detected.");
+            return true;
+        }
+    }
+
     [HarmonyPatch(typeof(OfferingBowl), "SpawnBoss")]
     public static class OfferingBowlPatch
     {
@@ -181,6 +214,28 @@ namespace CinematicBoss
         {
             //Patch.StartCinematic(__instance.transform.position);
             Patch.StartCinematic(spawnPoint);
+
+            if (ConfigurationFile.playersNearbyCutscene.Value)
+            {
+                List<Player> playersInRange = new List<Player>();
+                Player.GetPlayersInRange(__instance.transform.position, ConfigurationFile.playersNearbyRange.Value, playersInRange);
+
+                foreach (var playerInfo in playersInRange)
+                {
+                    if (playerInfo.GetPlayerID() != Player.m_localPlayer.GetPlayerID())
+                    {
+                        ZPackage package = new ZPackage();
+                        package.Write(spawnPoint);
+                        ZRoutedRpc.instance.InvokeRoutedRPC(playerInfo.GetZDOID().UserID, "RPC_CinematicPlayerNearby", package);
+                    }
+                }
+            }
+        }
+
+        public static void RPC_CinematicPlayerNearby(long sender, ZPackage package)
+        {
+            Logger.Log($"RPC_CinematicPlayerNearby | sender {sender} sending cutscene to player {Player.m_localPlayer.GetPlayerID()}");
+            Patch.StartCinematic(package.ReadVector3());
         }
     }
 
@@ -281,7 +336,7 @@ namespace CinematicBoss
     {
         static void Postfix(ref bool __result)
         {
-            if (Patch.State != Patch.CinematicState.Inactive)
+            if (ConfigurationFile.lockPlayerDuringCutscene.Value && Patch.State != Patch.CinematicState.Inactive)
             {
                 __result = true;
             }
