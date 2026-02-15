@@ -82,6 +82,7 @@
     <Content Include="ILRepack.targets" />
     <Content Include="Libs\ServerSync.dll" />
     <Content Include="MODGEN\CHANGELOG.md" />
+    <Content Include="MODGEN\icon.png" />
     <Content Include="MODGEN\manifest.json" />
     <Content Include="MODGEN\README.md" />
     <Content Include="pdb2mdb.exe" />
