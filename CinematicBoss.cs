@@ -48,7 +48,7 @@ namespace CinematicBoss
         {
             new Terminal.ConsoleCommand("remove_cutscene", "Rollback cutscene and move camera back to player", args =>
             {
-                Patch.EndCinematic();
+                Cutscene.EndCinematic();
             });
         }
     }

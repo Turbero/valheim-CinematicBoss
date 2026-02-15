@@ -71,6 +71,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CinematicBoss.cs" />
+    <Compile Include="Cutscene.cs" />
     <Compile Include="ConfigurationFile.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="Patch.cs" />
