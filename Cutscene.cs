@@ -17,6 +17,7 @@ namespace CinematicBoss
         public static CinematicState State = CinematicState.Inactive;
 
         public static Vector3 SpawnPoint;
+        public static string BossName;
         public static Vector3 StartPos;
         public static Quaternion StartRot;
         public static Vector3 TargetPos;
@@ -37,14 +38,15 @@ namespace CinematicBoss
 
         // --------------------------------------------------
 
-        public static void StartCinematic(Vector3 spawnPoint)
+        public static void StartCinematic(Vector3 spawnPoint, string bossPrefabName)
         {
             if (!Player.m_localPlayer || !GameCamera.instance)
                 return;
             
             Logger.Log("Cinematic started for player "+Player.m_localPlayer.GetPlayerName());
-
+            
             SpawnPoint = spawnPoint;
+            BossName = bossPrefabName.Replace("(Clone)", "");
 
             Transform cam = GameCamera.instance.transform;
             StartPos = cam.position;

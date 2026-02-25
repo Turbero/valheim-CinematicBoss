@@ -39,7 +39,7 @@ namespace CinematicBoss
         static void Postfix(OfferingBowl __instance, Vector3 spawnPoint)
         {
             //Patch.StartCinematic(__instance.transform.position);
-            Cutscene.StartCinematic(spawnPoint);
+            Cutscene.StartCinematic(spawnPoint, __instance.m_bossPrefab.name);
 
             if (ConfigurationFile.playersNearbyCutscene.Value)
             {
@@ -52,6 +52,7 @@ namespace CinematicBoss
                     {
                         ZPackage package = new ZPackage();
                         package.Write(spawnPoint);
+                        package.Write(__instance.m_bossPrefab.name);
                         ZRoutedRpc.instance.InvokeRoutedRPC(playerInfo.GetZDOID().UserID, "RPC_CinematicPlayerNearby", package);
                     }
                 }
@@ -61,7 +62,7 @@ namespace CinematicBoss
         public static void RPC_CinematicPlayerNearby(long sender, ZPackage package)
         {
             Logger.Log($"RPC_CinematicPlayerNearby | sender {sender} sending cutscene to player {Player.m_localPlayer.GetPlayerID()}");
-            Cutscene.StartCinematic(package.ReadVector3());
+            Cutscene.StartCinematic(package.ReadVector3(), package.ReadString());
         }
     }
 
@@ -129,7 +130,8 @@ namespace CinematicBoss
                         cam.rotation = Quaternion.LookRotation(lookDir);
                     }
 
-                    if (Cutscene.Timer >= ConfigurationFile.waitAtBossCameraPosition.Value)
+                    float waitingTime = ConfigurationFile.waitAtBossCameraPosition.Value ? GetWaitTimeByBossName(Cutscene.BossName) : 1f;
+                    if (Cutscene.Timer >= waitingTime)
                     {
                         Cutscene.Timer = 0f;
                         Cutscene.State = Cutscene.CinematicState.Returning;
@@ -151,6 +153,26 @@ namespace CinematicBoss
             }
 
             return true;
+        }
+
+        private static float GetWaitTimeByBossName(string bossPrefabName)
+        {
+            Logger.Log("bossPrefabName: " + bossPrefabName);
+            if (bossPrefabName.Equals("Eikthyr"))
+                return 3f;
+            if (bossPrefabName.Equals("gd_king"))
+                return 5f;
+            if (bossPrefabName.Equals("Bonemass"))
+                return 3f;
+            if (bossPrefabName.Equals("Dragon"))
+                return 2f;
+            if (bossPrefabName.Equals("GoblinKing"))
+                return 10f;
+            if (bossPrefabName.Equals("SeekerQueen"))
+                return 2f;
+            if (bossPrefabName.Equals("Fader"))
+                return 2f;
+            return 1f;
         }
     }
 

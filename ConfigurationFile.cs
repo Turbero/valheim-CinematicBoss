@@ -12,7 +12,7 @@ namespace CinematicBoss
 
         public static ConfigEntry<bool> debug;
 
-        public static ConfigEntry<float> waitAtBossCameraPosition;
+        public static ConfigEntry<bool> waitAtBossCameraPosition;
         public static ConfigEntry<float> cameraGoesToBossDuration;
         public static ConfigEntry<bool> lockPlayerDuringCutscene;
 
@@ -44,7 +44,7 @@ namespace CinematicBoss
                 debug = config("1 - General", "DebugMode", false, "Enabling/Disabling the debugging in the console (default = false)", false);
                 
                 cameraGoesToBossDuration = config("2 - Cinematic Camera", "Camera goes from player to boss (seconds)", 10f, "Duration of the camera movement going to the boss position where it will appear in the world after the offering is done");
-                waitAtBossCameraPosition = config("2 - Cinematic Camera", "Camera waits at boss (seconds)", 1f, "Time to wait at boss camera position after the boss spawns and before returning to the player");
+                waitAtBossCameraPosition = config("2 - Cinematic Camera", "Camera waits at boss until he is fully out (true/false)", true, "Camera waits the necessary time at boss after he spawns before returning to the player (if false, just wait for one second after spawning)");
                 lockPlayerDuringCutscene = config("2 - Cinematic Camera", "Player is locked during cutscene (true/false)", true, "Players cannot move during cutscene if true, otherwise they can move around  but the camera will not be focused at them (default = true)");
                 
                 letterBoxDuration = config("3 - Cinematic Letter Box", "Letter Box Duration (seconds)", 2f, "Duration of the black area up and down on the screen when an offering is accepted and the boss shows up on the ground");
@@ -79,9 +79,9 @@ namespace CinematicBoss
                 configFile.Reload();
                 SettingsChanged(null, null);
             }
-            catch
+            catch (Exception ex)
             {
-                Logger.LogError($"There was an issue loading {ConfigFileName}");
+                Logger.LogError($"There was an issue loading {ConfigFileName}: " + ex);
             }
         }
 
