@@ -1,5 +1,9 @@
 ### CHANGELOG
 
+## 1.1.1
+
+* Changed option "Camera waits at boss (seconds)" into "Camera waits at boss until he is fully out (true/false)". Now the waiting time matches for each vanilla boss exactly until they are fully out.
+
 ## 1.1.0
 
 Added:
