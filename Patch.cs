@@ -5,6 +5,27 @@ using UnityEngine;
 
 namespace CinematicBoss
 {
+    public class EnemiesCounts
+    {
+        public static int GetCountMonstersAroundPlayer()
+        {
+            List<Character> charactersNearby = new List<Character>();
+            Vector3 playerPosition = Player.m_localPlayer.transform.position;
+            Character.GetCharactersInRange(playerPosition, ConfigurationFile.acceptOfferingWithMonstersAroundRange.Value, charactersNearby);
+
+            return charactersNearby.FindAll(c => c.IsMonsterFaction(Time.time)).Count;
+        }
+        
+        public static int GetCountBossesAroundPlayer()
+        {
+            List<Character> charactersNearby = new List<Character>();
+            Vector3 playerPosition = Player.m_localPlayer.transform.position;
+            Character.GetCharactersInRange(playerPosition, ConfigurationFile.acceptOfferingWithMonstersAroundRange.Value, charactersNearby);
+
+            return charactersNearby.FindAll(c => c.IsBoss()).Count;
+        }
+    }
+    
     [HarmonyPatch(typeof(OfferingBowl), "InitiateSpawnBoss")]
     public static class InitiateSpawnBossPatch
     {
@@ -16,11 +37,7 @@ namespace CinematicBoss
             //Detect monsters around
             Logger.Log("Detecting monsters around "+ConfigurationFile.acceptOfferingWithMonstersAroundRange.Value + " meters...");
 
-            List<Character> charactersNearby = new List<Character>();
-            Vector3 playerPosition = Player.m_localPlayer.transform.position;
-            Character.GetCharactersInRange(playerPosition, ConfigurationFile.acceptOfferingWithMonstersAroundRange.Value, charactersNearby);
-
-            int countMonsters = charactersNearby.FindAll(c => c.IsMonsterFaction(Time.time)).Count;
+            int countMonsters = EnemiesCounts.GetCountMonstersAroundPlayer();
             if (countMonsters > 0)
             {
                 Logger.Log(countMonsters + " monsters detected. Cancelling...");
@@ -38,6 +55,13 @@ namespace CinematicBoss
     {
         static void Postfix(OfferingBowl __instance, Vector3 spawnPoint)
         {
+            int countBosses = EnemiesCounts.GetCountBossesAroundPlayer();
+            if (countBosses > 0)
+            {
+                Logger.Log("Same boss is already out. Skipping cutscene.");
+                return;
+            }
+            
             //Patch.StartCinematic(__instance.transform.position);
             Cutscene.StartCinematic(spawnPoint, __instance.m_bossPrefab.name);
 
@@ -159,7 +183,7 @@ namespace CinematicBoss
         {
             Logger.Log("bossPrefabName: " + bossPrefabName);
             if (bossPrefabName.Equals("Eikthyr"))
-                return 3f;
+                return 2f;
             if (bossPrefabName.Equals("gd_king"))
                 return 5f;
             if (bossPrefabName.Equals("Bonemass"))
