@@ -1,5 +1,10 @@
 ### CHANGELOG
 
+## 1.1.2
+
+* Cinematic skipped when boss is already out around the altar (to avoid getting stuck and destroyed by the first spawn)
+* Decreased Eikthyr waiting time for camera to go back to player one second less (it was 3, now 2)
+
 ## 1.1.1
 
 * Changed option "Camera waits at boss (seconds)" into "Camera waits at boss until he is fully out (true/false)". Now the waiting time matches for each vanilla boss exactly until they are fully out.
