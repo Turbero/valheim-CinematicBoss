@@ -48,6 +48,9 @@
     <Reference Include="ServerSync">
       <HintPath>..\..\Libs\External\ServerSync.dll</HintPath>
     </Reference>
+    <Reference Include="Splatform">
+      <HintPath>..\..\Libs\Splatform.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
