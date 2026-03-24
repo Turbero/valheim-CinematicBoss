@@ -45,7 +45,7 @@ namespace CinematicBoss
                 
                 cameraGoesToBossDuration = config("2 - Cinematic Camera", "Camera goes from player to boss (seconds)", 10f, "Duration of the camera movement going to the boss position where it will appear in the world after the offering is done");
                 waitAtBossCameraPosition = config("2 - Cinematic Camera", "Camera waits at boss until he is fully out (true/false)", true, "Camera waits the necessary time at boss after he spawns before returning to the player (if false, just wait for one second after spawning)");
-                lockPlayerDuringCutscene = config("2 - Cinematic Camera", "Player is locked during cutscene (true/false)", true, "Players cannot move during cutscene if true, otherwise they can move around  but the camera will not be focused at them (default = true)");
+                lockPlayerDuringCutscene = config("2 - Cinematic Camera", "Player is locked during cutscene (true/false)", true, "Players cannot move during cutscene if true, otherwise they can move around but the camera will not be focused at them (default = true)");
                 
                 letterBoxDuration = config("3 - Cinematic Letter Box", "Letter Box Duration (seconds)", 2f, "Duration of the black area up and down on the screen when an offering is accepted and the boss shows up on the ground");
                 letterBoxHeightPercent = config("3 - Cinematic Letter Box", "Letter Box Relative Size (percentage)", 6f, new ConfigDescription("Size in percentage of the screen that the black area of the letter box will cover", new AcceptableValueRange<float>(0f, 100f)));
