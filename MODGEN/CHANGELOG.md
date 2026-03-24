@@ -1,5 +1,10 @@
 ### CHANGELOG
 
+## 1.1.3
+
+* Fixed issue where players could block, jump or roll with dodge action during the cutscene.
+* Restricted "/remove_cutscene" command for admins only (this ends the player cutscene instantly)
+
 ## 1.1.2
 
 * Cinematic skipped when boss is already out around the altar (to avoid getting stuck and destroyed by the first spawn)
