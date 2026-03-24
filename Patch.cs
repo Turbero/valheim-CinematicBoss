@@ -200,9 +200,6 @@ namespace CinematicBoss
         }
     }
 
-    // --------------------------------------------------
-    // PLAYER LOCK
-    // --------------------------------------------------
     [HarmonyPatch(typeof(Player), nameof(Player.InCutscene))]
     public static class Player_InCutscene_Patch
     {
@@ -211,6 +208,19 @@ namespace CinematicBoss
             if (ConfigurationFile.lockPlayerDuringCutscene.Value && Cutscene.State != Cutscene.CinematicState.Inactive)
             {
                 __result = true;
+            }
+        }
+    }
+    [HarmonyPatch(typeof(ZInput), nameof(ZInput.GetButtonDown))]
+    [HarmonyPatch(typeof(ZInput), nameof(ZInput.GetButtonUp))]
+    [HarmonyPatch(typeof(ZInput), nameof(ZInput.GetButton))]
+    public static class ZInput_GetButtons_Patch
+    {
+        static void Postfix(ref bool __result)
+        {
+            if (ConfigurationFile.lockPlayerDuringCutscene.Value && Cutscene.State != Cutscene.CinematicState.Inactive)
+            {
+                __result = false;
             }
         }
     }
