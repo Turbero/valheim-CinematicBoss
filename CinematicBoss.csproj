@@ -65,6 +65,9 @@
     <Reference Include="UnityEngine.CoreModule">
       <HintPath>..\..\Libs\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.PhysicsModule">
+      <HintPath>..\..\Libs\UnityEngine.PhysicsModule.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine.UI">
       <HintPath>..\..\Libs\UnityEngine.UI.dll</HintPath>
     </Reference>
@@ -73,10 +76,14 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CameraEffects\CameraClearController.cs" />
+    <Compile Include="CameraEffects\CameraPatch.cs" />
+    <Compile Include="CameraEffects\ClearSightHoverResolver.cs" />
     <Compile Include="CinematicBoss.cs" />
     <Compile Include="Cutscene.cs" />
     <Compile Include="ConfigurationFile.cs" />
     <Compile Include="Logger.cs" />
+    <Compile Include="ModUtils.cs" />
     <Compile Include="Patch.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

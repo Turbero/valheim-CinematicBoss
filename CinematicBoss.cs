@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using BepInEx;
+using BepInEx.Configuration;
 using HarmonyLib;
 using UnityEngine;
 
@@ -15,16 +16,43 @@ namespace CinematicBoss
 
         private readonly Harmony harmony = new Harmony(GUID);
 
+        internal static bool CullingEnabled;
+
+        internal static bool NoClipEnabled;
+        
         void Awake()
         {
             ConfigurationFile.LoadConfig(this);
 
             harmony.PatchAll();
+            
+            CullingEnabled = ConfigurationFile.CullingEnabledCfg.Value;
+            NoClipEnabled = ConfigurationFile.NoClipEnabledCfg.Value;
         }
         
         private void Start()
         {
             StartCoroutine(WaitForNetworking());
+        }
+        
+        
+ 
+        private void Update()
+        {
+         	KeyboardShortcut value = ConfigurationFile.ToggleCullKey.Value;
+         	if ((int)value.MainKey != 0 && ConfigurationFile.ToggleCullKey.Value.IsDown())
+         	{
+                CullingEnabled = !CullingEnabled;
+         		ConfigurationFile.CullingEnabledCfg.Value = !ConfigurationFile.CullingEnabledCfg.Value;
+         		Debug.Log("Camera culling: " + (ConfigurationFile.CullingEnabledCfg.Value ? "ON" : "OFF"));
+         	}
+         	value = ConfigurationFile.ToggleNoClipKey.Value;
+         	if ((int)value.MainKey != 0 && ConfigurationFile.ToggleNoClipKey.Value.IsDown())
+         	{
+         		NoClipEnabled = !NoClipEnabled;
+                ConfigurationFile.NoClipEnabledCfg.Value = !ConfigurationFile.NoClipEnabledCfg.Value;
+                Debug.Log("Camera no-clip: " + (NoClipEnabled ? "ON" : "OFF"));
+         	}
         }
 
         private System.Collections.IEnumerator WaitForNetworking()
