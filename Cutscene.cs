@@ -1,3 +1,4 @@
+using CinematicBoss.CameraEffects;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -71,6 +72,12 @@ namespace CinematicBoss
             BossInstance = null;
             
             Logger.Log("Cinematic ended for player "+Player.m_localPlayer.GetPlayerName());
+
+            if (ConfigurationFile.transparencyWhenInvokingBoss.Value)
+            {
+                CameraClearController.RestoreVisuals();
+                Logger.Log("Transparency effects restored.");
+            }
         }
 
         public static void HideHud(bool hide)

@@ -36,23 +36,23 @@ namespace CinematicBoss.CameraEffects
 
 		public static void OnAfterCameraUpdate(GameCamera cam)
 		{
+			if (!ConfigurationFile.transparencyWhenInvokingBoss.Value) return;
+			
 			if (cam == null || ModUtils.GetPrivateValue(cam, "m_camera") == null)
 			{
 				return;
 			}
+			RestoreVisuals();
 			if ((bool)ModUtils.GetPrivateValue(cam, "m_freeFly"))
 			{
-				RestoreVisuals();
 				return;
 			}
 			Player localPlayer = Player.m_localPlayer;
 			if (localPlayer == null)
 			{
-				RestoreVisuals();
 				return;
 			}
-			RestoreVisuals();
-			if (CinematicBoss.CullingEnabled)
+			if (Cutscene.State != Cutscene.CinematicState.Inactive)
 			{
 				ApplyCulling(cam, localPlayer);
 			}
@@ -87,9 +87,9 @@ namespace CinematicBoss.CameraEffects
 			{
 				return;
 			}
-			float num = Mathf.Min(magnitude, ConfigurationFile.CullMaxDistanceCfg.Value);
+			float num = Mathf.Min(magnitude, ConfigurationFile.transparencyMaxDistance.Value);
 			Vector3 val2 = val / magnitude;
-			float num2 = Mathf.Max(0.05f, ConfigurationFile.CullRadiusCfg.Value);
+			float num2 = Mathf.Max(0.05f, ConfigurationFile.transparencyRadiusAreaEffect.Value);
 			RaycastHit[] array = Physics.SphereCastAll(position, num2, val2, num, GeometryMask, (QueryTriggerInteraction)2);
 			if (array.Length == 0)
 			{
@@ -134,7 +134,7 @@ namespace CinematicBoss.CameraEffects
 			Vector2 val7 = new Vector2(val5.x, val5.y);
 			Vector2 val8 = val6 - val7;
 			float sqrMagnitude = val8.sqrMagnitude;
-			float value = ConfigurationFile.CullRadiusCfg.Value;
+			float value = ConfigurationFile.transparencyRadiusAreaEffect.Value;
 			return sqrMagnitude <= value * value;
 		}
 
@@ -201,9 +201,9 @@ namespace CinematicBoss.CameraEffects
 				{
 					gameObject.AddComponent<ClearSightOccluderTag>();
 				}
-				if (ConfigurationFile.UseTransparency && ClearSightTransparentTemplateProvider.Template != null)
+				if (ConfigurationFile.transparencyWhenInvokingBoss.Value && ClearSightTransparentTemplateProvider.Template != null)
 				{
-					FadeRenderersUnder(root, ConfigurationFile.FadeAlpha);
+					FadeRenderersUnder(root, ConfigurationFile.transparencyFadeAlpha.Value);
 				}
 				else
 				{
@@ -297,13 +297,13 @@ namespace CinematicBoss.CameraEffects
 					if (val.HasProperty("_Color") && val2.HasProperty("_Color"))
 					{
 						Color color = val.color;
-						color.a = ConfigurationFile.FadeAlpha;
+						color.a = ConfigurationFile.transparencyFadeAlpha.Value;
 						val2.color = color;
 					}
 					else if (val2.HasProperty("_Color"))
 					{
 						Color color2 = val2.color;
-						color2.a = ConfigurationFile.FadeAlpha;
+						color2.a = ConfigurationFile.transparencyFadeAlpha.Value;
 						val2.color = color2;
 					}
 					array[i] = val2;
@@ -312,7 +312,7 @@ namespace CinematicBoss.CameraEffects
 			return array;
 		}
 
-		private static void RestoreVisuals()
+		public static void RestoreVisuals()
 		{
 			if (fadeData.Count > 0)
 			{
