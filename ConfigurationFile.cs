@@ -63,8 +63,8 @@ namespace CinematicBoss
                 transparencyWhenInvokingBoss = config("2 - Cinematic Camera", "Transparency in objects around boss altar when invoking", true, "Add a smooth transparency effect to surrounding objects when invoking a boss when they are an obstacle to see the boss appearing.");
                 
                 transparencyWhenInvokingBossList = config("2.1 - Transparency Effect", "Bosses to apply transparency", "Eikthyr,gd_king", "Comma-separated boss prefabId list to apply transparency effect during cutscene");
-                transparencyFadeAlpha = config("2.1 - Transparency Effect", "Transparency Fade Alpha", 0.25f, new ConfigDescription("Alpha value (0–1) used to apply transparency on objects during cutscene", new AcceptableValueRange<float>(0f, 1f)));
-                transparencyRadiusAreaEffect = config("2.1 - Transparency Effect", "Transparency Area Effect", 10f, "Radius of the sphere delimited between camera and player to find occluding pieces and apply transparency effect on them during cutscene");
+                transparencyFadeAlpha = config("2.1 - Transparency Effect", "Transparency Fade Alpha", 0.20f, new ConfigDescription("Alpha value (0–1) used to apply transparency on objects during cutscene", new AcceptableValueRange<float>(0f, 1f)));
+                transparencyRadiusAreaEffect = config("2.1 - Transparency Effect", "Transparency Area Effect", 15f, "Radius of the sphere delimited between camera and player to find occluding pieces and apply transparency effect on them during cutscene");
                 transparencyMaxDistance = config("2.1 - Transparency Effect", "Transparency Max Distance", 15f, "Maximum distance from the camera to look for items to apply transparency effect on them during cutscene");
                 
                 letterBoxDuration = config("3 - Cinematic Letter Box", "Letter Box Duration (seconds)", 2f, "Duration of the black area up and down on the screen when an offering is accepted and the boss shows up on the ground");
