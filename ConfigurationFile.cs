@@ -62,7 +62,7 @@ namespace CinematicBoss
                 lockPlayerDuringCutscene = config("2 - Cinematic Camera", "Player is locked during cutscene (true/false)", true, "Players cannot move during cutscene if true, otherwise they can move around but the camera will not be focused at them (default = true)");
                 transparencyWhenInvokingBoss = config("2 - Cinematic Camera", "Transparency in objects around boss altar when invoking", true, "Add a smooth transparency effect to surrounding objects when invoking a boss when they are an obstacle to see the boss appearing.");
                 
-                transparencyWhenInvokingBossList = config("2.1 - Transparency Effect", "Bosses to apply transparency", "Eikthyr,gd_king,GoblinKing", "Comma-separated boss prefabId list to apply transparency effect during cutscene");
+                transparencyWhenInvokingBossList = config("2.1 - Transparency Effect", "Bosses to apply transparency", "Eikthyr,gd_king", "Comma-separated boss prefabId list to apply transparency effect during cutscene");
                 transparencyFadeAlpha = config("2.1 - Transparency Effect", "Transparency Fade Alpha", 0.25f, new ConfigDescription("Alpha value (0–1) used to apply transparency on objects during cutscene", new AcceptableValueRange<float>(0f, 1f)));
                 transparencyRadiusAreaEffect = config("2.1 - Transparency Effect", "Transparency Area Effect", 10f, "Radius of the sphere delimited between camera and player to find occluding pieces and apply transparency effect on them during cutscene");
                 transparencyMaxDistance = config("2.1 - Transparency Effect", "Transparency Max Distance", 15f, "Maximum distance from the camera to look for items to apply transparency effect on them during cutscene");

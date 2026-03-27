@@ -13,7 +13,10 @@ namespace CinematicBoss.CameraEffects
 		{
 			if (Cutscene.State == Cutscene.CinematicState.Inactive) return; 
 			
-			if (Player.m_localPlayer == null || __instance != Player.m_localPlayer || !ConfigurationFile.transparencyWhenInvokingBoss.Value || ModUtils.GetPrivateValue(__instance, "m_hovering") == null)
+			if (Player.m_localPlayer == null || __instance != Player.m_localPlayer ||
+			    !ConfigurationFile.transparencyWhenInvokingBoss.Value ||
+			    !ConfigurationFile.transparencyWhenInvokingBossList.Value.Contains(Cutscene.BossName) ||
+			    ModUtils.GetPrivateValue(__instance, "m_hovering") == null)
 				return;
 			
 			GameObject hovering = (GameObject)ModUtils.GetPrivateValue(__instance, "m_hovering");
@@ -41,6 +44,7 @@ namespace CinematicBoss.CameraEffects
 			
 			if (Player.m_localPlayer != null && !__instance == Player.m_localPlayer && 
 			    ConfigurationFile.transparencyWhenInvokingBoss.Value && 
+			    ConfigurationFile.transparencyWhenInvokingBossList.Value.Contains(Cutscene.BossName) &&
 			    ModUtils.GetPrivateValue(__instance, "m_hovering") != null &&
 			    ((GameObject)ModUtils.GetPrivateValue(__instance, "m_hovering")).GetComponentInParent<ClearSightOccluderTag>() != null)
 			{
@@ -65,8 +69,9 @@ namespace CinematicBoss.CameraEffects
 			if (Cutscene.State == Cutscene.CinematicState.Inactive) return;
 			
 			if (Player.m_localPlayer != null && __instance == Player.m_localPlayer &&
-			    ConfigurationFile.transparencyWhenInvokingBoss.Value
-			    && go != null && go.GetComponentInParent<ClearSightOccluderTag>() != null &&
+			    ConfigurationFile.transparencyWhenInvokingBoss.Value &&
+			    ConfigurationFile.transparencyWhenInvokingBossList.Value.Contains(Cutscene.BossName) &&
+			    go != null && go.GetComponentInParent<ClearSightOccluderTag>() != null &&
 			    go.GetComponentInParent<Hoverable>() == null && 
 			    go.GetComponentInParent<Interactable>() == null &&
 			    ClearSightHoverResolver.TryResolveHoverBehindOccluder(__instance, out GameObject bestHover, out Character bestChar))

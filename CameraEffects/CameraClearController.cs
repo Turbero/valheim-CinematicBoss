@@ -52,7 +52,7 @@ namespace CinematicBoss.CameraEffects
 			{
 				return;
 			}
-			if (Cutscene.State != Cutscene.CinematicState.Inactive)
+			if (Cutscene.State != Cutscene.CinematicState.Inactive && ConfigurationFile.transparencyWhenInvokingBossList.Value.Contains(Cutscene.BossName))
 			{
 				ApplyCulling(cam, localPlayer);
 			}
