@@ -10,7 +10,7 @@ namespace CinematicBoss
     {
         public const string GUID = "Turbero.CinematicBoss";
         public const string NAME = "Cinematic Boss";
-        public const string VERSION = "1.1.3";
+        public const string VERSION = "1.2.0";
 
         private readonly Harmony harmony = new Harmony(GUID);
         

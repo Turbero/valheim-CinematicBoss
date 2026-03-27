@@ -1,5 +1,12 @@
 ### CHANGELOG
 
+## 1.2.0
+
+* Added configurable transparency effects for bosses with obstacles around when invoking them in their altars.
+  * Configurable list of bosses to use this effect. Add their prefabNames in the .cfg file (Eikthyr,gd_king,Bonemass,Dragon,GoblinKing,SeekerQueen,Fader) and even other mods enemies.
+  * By default, it will apply to Eikthyr and Elder (gd_king)
+  * Other effects like alpha value and area of transparency effect available to manipulate in .cfg file as well
+
 ## 1.1.3
 
 * Fixed issue where players could block, jump or roll with dodge action during the cutscene.
