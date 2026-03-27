@@ -11,7 +11,8 @@ namespace CinematicBoss.CameraEffects
 	{
 		private static void Postfix(Player __instance)
 		{
-			if (Cutscene.State == Cutscene.CinematicState.Inactive) return; 
+			if (Cutscene.State == Cutscene.CinematicState.Inactive)
+				return; 
 			
 			if (Player.m_localPlayer == null || __instance != Player.m_localPlayer ||
 			    !ConfigurationFile.transparencyWhenInvokingBoss.Value ||
@@ -22,15 +23,15 @@ namespace CinematicBoss.CameraEffects
 			GameObject hovering = (GameObject)ModUtils.GetPrivateValue(__instance, "m_hovering");
 			if (hovering.GetComponentInParent<ClearSightOccluderTag>() != null && hovering.GetComponentInParent<Hoverable>() == null && hovering.GetComponentInParent<Interactable>() == null)
 			{
-				if (!ClearSightHoverResolver.TryResolveHoverBehindOccluder(__instance, out GameObject bestHover, out Character bestChar))
+				if (!ClearSightHoverResolver.TryResolveHoverBehindOccluder(__instance, out GameObject mostConvenientHover, out Character mostConvenientChar))
 				{
 					ModUtils.SetPrivateValue(__instance, "m_hovering", null);
 					ModUtils.SetPrivateValue(__instance, "m_hoveringCreature", null);
 				}
 				else
 				{
-					ModUtils.SetPrivateValue(__instance, "m_hovering", bestHover);
-					ModUtils.SetPrivateValue(__instance, "m_hoveringCreature", bestChar);
+					ModUtils.SetPrivateValue(__instance, "m_hovering", mostConvenientHover);
+					ModUtils.SetPrivateValue(__instance, "m_hoveringCreature", mostConvenientChar);
 				}
 			}
 		}
@@ -40,7 +41,8 @@ namespace CinematicBoss.CameraEffects
 	{
 		private static void Prefix(Player __instance)
 		{
-			if (Cutscene.State == Cutscene.CinematicState.Inactive) return;
+			if (Cutscene.State == Cutscene.CinematicState.Inactive)
+				return;
 			
 			if (Player.m_localPlayer != null && !__instance == Player.m_localPlayer && 
 			    ConfigurationFile.transparencyWhenInvokingBoss.Value && 
@@ -48,15 +50,15 @@ namespace CinematicBoss.CameraEffects
 			    ModUtils.GetPrivateValue(__instance, "m_hovering") != null &&
 			    ((GameObject)ModUtils.GetPrivateValue(__instance, "m_hovering")).GetComponentInParent<ClearSightOccluderTag>() != null)
 			{
-				if (!ClearSightHoverResolver.TryResolveHoverBehindOccluder(__instance, out GameObject bestHover, out Character bestChar))
+				if (!ClearSightHoverResolver.TryResolveHoverBehindOccluder(__instance, out GameObject mostConvenientHover, out Character mostConvenientChar))
 				{
 					ModUtils.SetPrivateValue(__instance, "m_hovering", null);
 					ModUtils.SetPrivateValue(__instance, "m_hoveringCreature", null);
 				}
 				else
 				{
-					ModUtils.SetPrivateValue(__instance, "m_hovering", bestHover);
-					ModUtils.SetPrivateValue(__instance, "m_hoveringCreature", bestChar);
+					ModUtils.SetPrivateValue(__instance, "m_hovering", mostConvenientHover);
+					ModUtils.SetPrivateValue(__instance, "m_hoveringCreature", mostConvenientChar);
 				}
 			}
 		}
@@ -74,12 +76,11 @@ namespace CinematicBoss.CameraEffects
 			    go != null && go.GetComponentInParent<ClearSightOccluderTag>() != null &&
 			    go.GetComponentInParent<Hoverable>() == null && 
 			    go.GetComponentInParent<Interactable>() == null &&
-			    ClearSightHoverResolver.TryResolveHoverBehindOccluder(__instance, out GameObject bestHover, out Character bestChar))
+			    ClearSightHoverResolver.TryResolveHoverBehindOccluder(__instance, out GameObject mostConvenientHover, out Character mostConvenientChar))
 			{
-				Logger.Log("Player.Interact redirect: " + go.name + " (occluder) → " + bestHover.name);
-				go = bestHover;
-				ModUtils.SetPrivateValue(__instance, "m_hovering", bestHover);
-				ModUtils.SetPrivateValue(__instance, "m_hoveringCreature", bestChar);
+				go = mostConvenientHover;
+				ModUtils.SetPrivateValue(__instance, "m_hovering", mostConvenientHover);
+				ModUtils.SetPrivateValue(__instance, "m_hoveringCreature", mostConvenientChar);
 			}
 		}
 	}
@@ -96,7 +97,8 @@ namespace CinematicBoss.CameraEffects
 	{
 		private static void Prefix()
 		{
-			if (Cutscene.State == Cutscene.CinematicState.Inactive) return;
+			if (Cutscene.State == Cutscene.CinematicState.Inactive)
+				return;
 			
 			try
 			{
@@ -104,22 +106,18 @@ namespace CinematicBoss.CameraEffects
 				FieldInfo info = type.GetField("s_allPieces", BindingFlags.NonPublic | BindingFlags.Static);
 				var s_allPieces = info?.GetValue(null);
 				if (s_allPieces == null)
-				{
 					return;
-				}
-
+				
 				List<Piece> allPieces = (List<Piece>)s_allPieces;
 				for (int num = allPieces.Count - 1; num >= 0; num--)
 				{
 					if (allPieces[num] == null)
-					{
 						allPieces.RemoveAt(num);
-					}
 				}
 			}
-			catch (Exception arg)
+			catch (Exception ex)
 			{
-				Logger.LogError($"Failed to sanitize Piece.m_allPieces: {arg}");
+				Logger.LogError($"Error when cleaning Piece.m_allPieces. {ex}");
 			}
 		}
 	}

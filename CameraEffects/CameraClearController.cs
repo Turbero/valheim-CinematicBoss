@@ -6,7 +6,7 @@ namespace CinematicBoss.CameraEffects
 {
 	internal static class CameraClearController
 	{
-		class RendererFadeData
+		class RendererFadeElements
 		{
 			public Renderer Renderer;
 			public Material[] OriginalShared = Array.Empty<Material>();
@@ -17,7 +17,7 @@ namespace CinematicBoss.CameraEffects
 		private static readonly HashSet<Renderer> hiddenRendererSet = new HashSet<Renderer>();
 		private static readonly Dictionary<Renderer, bool> originalEnabled = new Dictionary<Renderer, bool>();
 		private static readonly Dictionary<Renderer, bool> originalForceOff = new Dictionary<Renderer, bool>();
-		private static readonly Dictionary<Renderer, RendererFadeData> fadeData = new Dictionary<Renderer, RendererFadeData>();
+		private static readonly Dictionary<Renderer, RendererFadeElements> fadeData = new Dictionary<Renderer, RendererFadeElements>();
 
 		private static int _geometryMask;
 		
@@ -39,232 +39,202 @@ namespace CinematicBoss.CameraEffects
 			if (!ConfigurationFile.transparencyWhenInvokingBoss.Value) return;
 			
 			if (cam == null || ModUtils.GetPrivateValue(cam, "m_camera") == null)
-			{
 				return;
-			}
+			
 			RestoreVisuals();
 			if ((bool)ModUtils.GetPrivateValue(cam, "m_freeFly"))
-			{
 				return;
-			}
+			
 			Player localPlayer = Player.m_localPlayer;
 			if (localPlayer == null)
-			{
 				return;
-			}
+			
 			if (Cutscene.State != Cutscene.CinematicState.Inactive && ConfigurationFile.transparencyWhenInvokingBossList.Value.Contains(Cutscene.BossName))
-			{
-				ApplyCulling(cam, localPlayer);
-			}
+				ApplyTransparency(cam, localPlayer);
 		}
 
 		private static Vector3 GetCameraTargetPosition(Player player)
 		{
 			if (player.m_eye != null)
-			{
 				return player.m_eye.position;
-			}
+			
 			var head = ModUtils.GetPrivateValue(player, "m_head");
 			if (head != null)
-			{
 				return ((Transform)head).position;
-			}
+			
 			return player.transform.position + Vector3.up * 1.6f;
 		}
 
-		private static void ApplyCulling(GameCamera cam, Player player)
+		private static void ApplyTransparency(GameCamera cam, Player player)
 		{
 			var camera = ModUtils.GetPrivateValue(cam, "m_camera");
 			if (camera == null)
-			{
 				return;
-			}
+			
 			Vector3 position = ((Camera)camera).transform.position;
 			Vector3 cameraTargetPosition = GetCameraTargetPosition(player);
-			Vector3 val = cameraTargetPosition - position;
-			float magnitude = val.magnitude;
+			Vector3 diff = cameraTargetPosition - position;
+			float magnitude = diff.magnitude;
 			if (magnitude < 0.1f)
-			{
 				return;
-			}
-			float num = Mathf.Min(magnitude, ConfigurationFile.transparencyMaxDistance.Value);
-			Vector3 val2 = val / magnitude;
-			float num2 = Mathf.Max(0.05f, ConfigurationFile.transparencyRadiusAreaEffect.Value);
-			RaycastHit[] array = Physics.SphereCastAll(position, num2, val2, num, GeometryMask, (QueryTriggerInteraction)2);
-			if (array.Length == 0)
-			{
+			
+			float maxDistance = Mathf.Min(magnitude, ConfigurationFile.transparencyMaxDistance.Value);
+			Vector3 relation = diff / magnitude;
+			float areaEffect = Mathf.Max(0.05f, ConfigurationFile.transparencyRadiusAreaEffect.Value);
+			RaycastHit[] raycastHitsOrigin = Physics.SphereCastAll(position, areaEffect, relation, maxDistance, GeometryMask, (QueryTriggerInteraction)2);
+			if (raycastHitsOrigin.Length == 0)
 				return;
-			}
-			RaycastHit[] array2 = array;
-			for (int i = 0; i < array2.Length; i++)
+			
+			RaycastHit[] raycastHits = raycastHitsOrigin;
+			for (int i = 0; i < raycastHits.Length; i++)
 			{
-				RaycastHit val3 = array2[i];
-				Collider collider = val3.collider;
-				if (collider != null && ShouldCullCollider((Camera)camera, cameraTargetPosition, collider, out Component root))
-				{
-					CullUnderRoot(root);
-				}
+				RaycastHit raycastHit = raycastHits[i];
+				Collider collider = raycastHit.collider;
+				if (collider != null && HasToApplyTransparencyToCollider((Camera)camera, cameraTargetPosition, collider, out Component root))
+					TransparencyOnComponent(root);
 			}
 		}
 
-		private static bool IsObstructingPlayer(Camera cam, Vector3 playerEyePos, Collider col)
+		private static bool IsBlockingPlayer(Camera camera, Vector3 playerEyePos, Collider collider)
 		{
-			Vector3 position = cam.transform.position;
-			Vector3 val = playerEyePos - position;
-			float magnitude = val.magnitude;
+			Vector3 position = camera.transform.position;
+			Vector3 diff = playerEyePos - position;
+			float magnitude = diff.magnitude;
 			if (magnitude < 0.1f)
-			{
 				return false;
-			}
-			Vector3 val2 = val / magnitude;
-			Vector3 val3 = SafeClosestPoint(col, playerEyePos);
-			float num = Vector3.Dot(val3 - position, val2);
-			float num2 = magnitude;
-			if (num <= 0f || num >= num2 + 0.05f)
-			{
+			
+			Vector3 relation = diff / magnitude;
+			Vector3 closestPoint = SafeClosestPoint(collider, playerEyePos);
+			float dotValue = Vector3.Dot(closestPoint - position, relation);
+			float magnitudeValue = magnitude;
+			if (dotValue <= 0f || dotValue >= magnitudeValue + 0.05f)
 				return false;
-			}
-			Vector3 val4 = cam.WorldToViewportPoint(playerEyePos);
-			Vector3 val5 = cam.WorldToViewportPoint(val3);
-			if (val5.z <= 0f)
-			{
+			
+			Vector3 playerPointViewport = camera.WorldToViewportPoint(playerEyePos);
+			Vector3 closestPointViewport = camera.WorldToViewportPoint(closestPoint);
+			if (closestPointViewport.z <= 0f)
 				return false;
-			}
-			Vector2 val6 = new Vector2(val4.x, val4.y);
-			Vector2 val7 = new Vector2(val5.x, val5.y);
-			Vector2 val8 = val6 - val7;
-			float sqrMagnitude = val8.sqrMagnitude;
-			float value = ConfigurationFile.transparencyRadiusAreaEffect.Value;
-			return sqrMagnitude <= value * value;
+			
+			Vector2 playerViewport = new Vector2(playerPointViewport.x, playerPointViewport.y);
+			Vector2 closestViewport = new Vector2(closestPointViewport.x, closestPointViewport.y);
+			Vector2 diffViewport = playerViewport - closestViewport;
+			float sqrMagnitude = diffViewport.sqrMagnitude;
+			float radiusAreaEffect = ConfigurationFile.transparencyRadiusAreaEffect.Value;
+			return sqrMagnitude <= radiusAreaEffect * radiusAreaEffect;
 		}
 
-		private static Vector3 SafeClosestPoint(Collider col, Vector3 targetWorldPos)
+		private static Vector3 SafeClosestPoint(Collider collider, Vector3 targetWorldPos)
 		{
-			if (col == null)
-			{
+			if (collider == null)
 				return targetWorldPos;
-			}
-			if (!(col is BoxCollider) && !(col is SphereCollider) && !(col is CapsuleCollider))
+			
+			if (!(collider is BoxCollider) && !(collider is SphereCollider) && !(collider is CapsuleCollider))
 			{
-				MeshCollider val = col is MeshCollider ? (MeshCollider)col : null;
-				if (val != null && val.convex)
-				{
-					return val.ClosestPoint(targetWorldPos);
-				}
-				Bounds bounds = col.bounds;
+				MeshCollider meshCollider = collider is MeshCollider ? (MeshCollider)collider : null;
+				if (meshCollider != null && meshCollider.convex)
+					return meshCollider.ClosestPoint(targetWorldPos);
+				
+				Bounds bounds = collider.bounds;
 				return bounds.ClosestPoint(targetWorldPos);
 			}
-			return col.ClosestPoint(targetWorldPos);
+			return collider.ClosestPoint(targetWorldPos);
 		}
 
-		private static bool ShouldCullCollider(Camera cam, Vector3 playerEyePos, Collider col, out Component root)
+		private static bool HasToApplyTransparencyToCollider(Camera camera, Vector3 playerEyePos, Collider collider, out Component root)
 		{
 			root = null;
-			GameObject val = col.attachedRigidbody != null ? col.attachedRigidbody.gameObject : col.gameObject;
-			if (val == null)
-			{
+			GameObject go = collider.attachedRigidbody != null ? collider.attachedRigidbody.gameObject : collider.gameObject;
+			if (go == null)
 				return false;
-			}
-			if (val.GetComponentInParent<Player>() != null)
-			{
+			
+			if (go.GetComponentInParent<Player>() != null)
 				return false;
-			}
-			if (val.GetComponentInParent<Character>() != null)
-			{
+			
+			if (go.GetComponentInParent<Character>() != null)
 				return false;
-			}
-			if (val.GetComponentInParent<ItemDrop>() != null)
-			{
+			
+			if (go.GetComponentInParent<ItemDrop>() != null)
 				return false;
-			}
-			if (!IsObstructingPlayer(cam, playerEyePos, col))
-			{
+			
+			if (!IsBlockingPlayer(camera, playerEyePos, collider))
 				return false;
-			}
-			Piece componentInParent = val.GetComponentInParent<Piece>();
-			if (componentInParent != null)
+			
+			Piece parentPiece = go.GetComponentInParent<Piece>();
+			if (parentPiece != null)
 			{
-				root = componentInParent;
+				root = parentPiece;
 				return true;
 			}
-			root = val.transform;
+			root = go.transform;
 			return true;
 		}
 
-		private static void CullUnderRoot(Component root)
+		private static void TransparencyOnComponent(Component root)
 		{
 			if (root != null)
 			{
 				GameObject gameObject = root.gameObject;
-				Logger.Log("CULL UNDER ROOT [HoverFix] Hit " + gameObject.name + ", " + $"occluder={gameObject.GetComponentInParent<ClearSightOccluderTag>() != null}, " + $"hasHover={gameObject.GetComponentInParent<Hoverable>() != null}, " + $"hasInteract={gameObject.GetComponentInParent<Interactable>() != null}");
 				if (gameObject != null && gameObject.GetComponent<ClearSightOccluderTag>() == null)
-				{
 					gameObject.AddComponent<ClearSightOccluderTag>();
-				}
+				
 				if (ConfigurationFile.transparencyWhenInvokingBoss.Value && ClearSightTransparentTemplateProvider.Template != null)
-				{
-					FadeRenderersUnder(root, ConfigurationFile.transparencyFadeAlpha.Value);
-				}
+					FadeRenderersUnderComponent(root, ConfigurationFile.transparencyFadeAlpha.Value);
 				else
-				{
-					HideRenderersUnder(root);
-				}
+					HideRenderersUnderComponent(root);
 			}
 		}
 
-		private static void HideRenderersUnder(Component root)
+		private static void HideRenderersUnderComponent(Component root)
 		{
-			Renderer[] componentsInChildren = root.GetComponentsInChildren<Renderer>(true);
-			foreach (Renderer val in componentsInChildren)
+			Renderer[] renderers = root.GetComponentsInChildren<Renderer>(true);
+			foreach (Renderer renderer in renderers)
 			{
-				if (val != null && !hiddenRendererSet.Contains(val) && (val.enabled || originalEnabled.ContainsKey(val)))
+				if (renderer != null && !hiddenRendererSet.Contains(renderer) && (renderer.enabled || originalEnabled.ContainsKey(renderer)))
 				{
-					if (!originalEnabled.ContainsKey(val))
+					if (!originalEnabled.ContainsKey(renderer))
 					{
-						originalEnabled[val] = val.enabled;
-						originalForceOff[val] = val.forceRenderingOff;
+						originalEnabled[renderer] = renderer.enabled;
+						originalForceOff[renderer] = renderer.forceRenderingOff;
 					}
-					val.forceRenderingOff = true;
-					hiddenRendererSet.Add(val);
-					hiddenRenderers.Add(val);
+					renderer.forceRenderingOff = true;
+					hiddenRendererSet.Add(renderer);
+					hiddenRenderers.Add(renderer);
 				}
 			}
 		}
 
-		private static void FadeRenderersUnder(Component root, float targetAlpha)
+		private static void FadeRenderersUnderComponent(Component root, float targetAlpha)
 		{
-			Renderer[] componentsInChildren = root.GetComponentsInChildren<Renderer>(true);
+			Renderer[] renderersInChildren = root.GetComponentsInChildren<Renderer>(true);
 			targetAlpha = Mathf.Clamp01(targetAlpha);
-			Renderer[] array = componentsInChildren;
-			foreach (Renderer val in array)
+			Renderer[] renderers = renderersInChildren;
+			foreach (Renderer renderer in renderers)
 			{
-				if (val == null)
-				{
+				if (renderer == null)
 					continue;
-				}
-				if (!fadeData.TryGetValue(val, out RendererFadeData value))
+				
+				if (!fadeData.TryGetValue(renderer, out RendererFadeElements rendererFadeElements))
 				{
-					value = new RendererFadeData
+					rendererFadeElements = new RendererFadeElements
 					{
-						Renderer = val,
-						OriginalShared = val.sharedMaterials,
-						GhostMats = BuildGhostMaterials(val.sharedMaterials)
+						Renderer = renderer,
+						OriginalShared = renderer.sharedMaterials,
+						GhostMats = BuildGhostMaterials(renderer.sharedMaterials)
 					};
-					fadeData.Add(val, value);
+					fadeData.Add(renderer, rendererFadeElements);
 				}
-				if (value.GhostMats == null || value.GhostMats.Length == 0)
-				{
+				if (rendererFadeElements.GhostMats == null || rendererFadeElements.GhostMats.Length == 0)
 					continue;
-				}
-				val.sharedMaterials = value.GhostMats;
-				Material[] ghostMats = value.GhostMats;
-				foreach (Material val2 in ghostMats)
+				
+				renderer.sharedMaterials = rendererFadeElements.GhostMats;
+				Material[] materials = rendererFadeElements.GhostMats;
+				foreach (Material material in materials)
 				{
-					if (val2 != null && val2.HasProperty("_Color"))
+					if (material != null && material.HasProperty("_Color"))
 					{
-						Color color = val2.color;
+						Color color = material.color;
 						color.a = targetAlpha;
-						val2.color = color;
+						material.color = color;
 					}
 				}
 			}
@@ -281,48 +251,46 @@ namespace CinematicBoss.CameraEffects
 			{
 				return Array.Empty<Material>();
 			}
-			Material[] array = new Material[originals.Length];
+			Material[] materials = new Material[originals.Length];
 			for (int i = 0; i < originals.Length; i++)
 			{
-				Material val = originals[i];
-				if (val != null)
+				Material material = originals[i];
+				if (material != null)
 				{
-					Material val2 = new Material(template)
+					Material materialTemplate = new Material(template)
 					{
-						name = val.name + " (ClearSightGhost)",
-						mainTexture = val.mainTexture,
-						mainTextureScale = val.mainTextureScale,
-						mainTextureOffset = val.mainTextureOffset
+						name = material.name + " (ClearSightGhost)",
+						mainTexture = material.mainTexture,
+						mainTextureScale = material.mainTextureScale,
+						mainTextureOffset = material.mainTextureOffset
 					};
-					if (val.HasProperty("_Color") && val2.HasProperty("_Color"))
+					if (material.HasProperty("_Color") && materialTemplate.HasProperty("_Color"))
 					{
-						Color color = val.color;
+						Color color = material.color;
 						color.a = ConfigurationFile.transparencyFadeAlpha.Value;
-						val2.color = color;
+						materialTemplate.color = color;
 					}
-					else if (val2.HasProperty("_Color"))
+					else if (materialTemplate.HasProperty("_Color"))
 					{
-						Color color2 = val2.color;
+						Color color2 = materialTemplate.color;
 						color2.a = ConfigurationFile.transparencyFadeAlpha.Value;
-						val2.color = color2;
+						materialTemplate.color = color2;
 					}
-					array[i] = val2;
+					materials[i] = materialTemplate;
 				}
 			}
-			return array;
+			return materials;
 		}
 
 		public static void RestoreVisuals()
 		{
 			if (fadeData.Count > 0)
 			{
-				foreach (KeyValuePair<Renderer, RendererFadeData> fadeDatum in fadeData)
+				foreach (KeyValuePair<Renderer, RendererFadeElements> pair in fadeData)
 				{
-					RendererFadeData value = fadeDatum.Value;
+					RendererFadeElements value = pair.Value;
 					if (value.Renderer != null && value.OriginalShared != null && value.OriginalShared.Length != 0)
-					{
 						value.Renderer.sharedMaterials = value.OriginalShared;
-					}
 				}
 			}
 			if (hiddenRenderers.Count <= 0)
@@ -331,21 +299,16 @@ namespace CinematicBoss.CameraEffects
 			}
 			for (int i = 0; i < hiddenRenderers.Count; i++)
 			{
-				Renderer val = hiddenRenderers[i];
-				if (val != null)
+				Renderer renderer = hiddenRenderers[i];
+				if (renderer != null)
 				{
-					if (originalEnabled.TryGetValue(val, out var value2))
-					{
-						val.enabled = value2;
-					}
-					if (originalForceOff.TryGetValue(val, out var value3))
-					{
-						val.forceRenderingOff = value3;
-					}
+					if (originalEnabled.TryGetValue(renderer, out var value2))
+						renderer.enabled = value2;
+					
+					if (originalForceOff.TryGetValue(renderer, out var value3))
+						renderer.forceRenderingOff = value3;
 					else
-					{
-						val.forceRenderingOff = false;
-					}
+						renderer.forceRenderingOff = false;
 				}
 			}
 			hiddenRenderers.Clear();

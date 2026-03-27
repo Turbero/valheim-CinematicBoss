@@ -7,77 +7,70 @@ namespace CinematicBoss.CameraEffects
 {
     public static class ClearSightHoverResolver
 	{
-		internal static bool TryResolveHoverBehindOccluder(Player player, out GameObject bestHover, out Character bestChar)
+		internal static bool TryResolveHoverBehindOccluder(Player player, out GameObject mostConvenientHover, out Character mostConvenientChar)
 		{
-			bestHover = null;
-			bestChar = null;
+			mostConvenientHover = null;
+			mostConvenientChar = null;
 			GameCamera instance = GameCamera.instance;
 			if (instance == null || ModUtils.GetPrivateValue(instance, "m_camera") == null)
-			{
 				return false;
-			}
+			
 			Camera camera = (Camera)ModUtils.GetPrivateValue(instance, "m_camera");
 			Vector3 position = camera.transform.position;
 			Vector3 forward = camera.transform.forward;
 			int interactMask = (int)ModUtils.GetPrivateValue(player, "m_interactMask");
-			RaycastHit[] array = Physics.RaycastAll(position, forward, 50f, interactMask, (QueryTriggerInteraction)2);
-			if (array == null || array.Length == 0)
-			{
+			RaycastHit[] raycastHitsOrigin = Physics.RaycastAll(position, forward, 50f, interactMask, (QueryTriggerInteraction)2);
+			if (raycastHitsOrigin == null || raycastHitsOrigin.Length == 0)
 				return false;
-			}
-			Array.Sort(array, (a, b) => a.distance.CompareTo(b.distance));
-			RaycastHit[] array2 = array;
-			for (int i = 0; i < array2.Length; i++)
+			
+			Array.Sort(raycastHitsOrigin, (a, b) => a.distance.CompareTo(b.distance));
+			RaycastHit[] raycastHits = raycastHitsOrigin;
+			for (int i = 0; i < raycastHits.Length; i++)
 			{
-				RaycastHit val = array2[i];
-				Collider collider = val.collider;
+				RaycastHit raycastHit = raycastHits[i];
+				Collider collider = raycastHit.collider;
 				if (collider == null)
-				{
 					continue;
-				}
-				GameObject val2 = collider.attachedRigidbody ? collider.attachedRigidbody.gameObject : collider.gameObject;
-				if (val2 == null)
-				{
+				
+				GameObject go = collider.attachedRigidbody ? collider.attachedRigidbody.gameObject : collider.gameObject;
+				if (go == null)
 					continue;
-				}
-				bool flag = val2.GetComponentInParent<ClearSightOccluderTag>() != null;
-				Hoverable componentInParent = val2.GetComponentInParent<Hoverable>();
-				Interactable componentInParent2 = val2.GetComponentInParent<Interactable>();
-				Character componentInParent3 = val2.GetComponentInParent<Character>();
-				Logger.Log("TryResolveHoverBehindOccluder[HoverFix] Hit " + val2.name + ", " + $"occluder={flag}, hasHover={componentInParent != null}, hasInteract={componentInParent2 != null}");
-				if (val2.GetComponentInParent<Player>() == player || (flag && componentInParent3 == null && componentInParent == null && componentInParent2 == null))
-				{
+				
+				bool flag = go.GetComponentInParent<ClearSightOccluderTag>() != null;
+				Hoverable hoverable = go.GetComponentInParent<Hoverable>();
+				Interactable interactable = go.GetComponentInParent<Interactable>();
+				Character character = go.GetComponentInParent<Character>();
+				if (go.GetComponentInParent<Player>() == player || (flag && character == null && hoverable == null && interactable == null))
 					continue;
-				}
-				if (componentInParent3 != null && componentInParent3 != player)
+				
+				if (character != null && character != player)
 				{
-					bestHover = componentInParent3.gameObject;
-					bestChar = componentInParent3;
+					mostConvenientHover = character.gameObject;
+					mostConvenientChar = character;
 					break;
 				}
-				if (componentInParent != null || componentInParent2 != null)
+				if (hoverable != null || interactable != null)
 				{
-					var val3 = (Component)componentInParent;
-					if (val3 == null)
+					var componentToPickUp = (Component)hoverable;
+					if (componentToPickUp == null)
+						componentToPickUp = (Component)interactable;
+					
+					Component component = componentToPickUp;
+					if (component != null)
 					{
-						val3 = (Component)componentInParent2;
-					}
-					Component val4 = val3;
-					if (val4 != null)
-					{
-						bestChar = (bestHover = val4.gameObject).GetComponentInParent<Character>();
+						mostConvenientChar = (mostConvenientHover = component.gameObject).GetComponentInParent<Character>();
 						break;
 					}
 				}
-				Piece componentInParent4 = val2.GetComponentInParent<Piece>();
-				if (componentInParent4 != null)
+				Piece piece = go.GetComponentInParent<Piece>();
+				if (piece != null)
 				{
-					bestHover = componentInParent4.gameObject;
-					bestChar = componentInParent4.GetComponentInParent<Character>();
+					mostConvenientHover = piece.gameObject;
+					mostConvenientChar = piece.GetComponentInParent<Character>();
 					break;
 				}
 			}
-			return bestHover != null;
+			return mostConvenientHover != null;
 		}
 	}
 	
@@ -86,7 +79,7 @@ namespace CinematicBoss.CameraEffects
 	}
 	internal static class ClearSightTransparentTemplateProvider
 	{
-		private static bool _initialized;
+		private static bool initialized;
 
 		private static Material _template;
 
@@ -94,7 +87,7 @@ namespace CinematicBoss.CameraEffects
 		{
 			get
 			{
-				if (!_initialized)
+				if (!initialized)
 				{
 					InitializeLazy();
 				}
@@ -104,143 +97,125 @@ namespace CinematicBoss.CameraEffects
 
 		internal static void BootstrapFromFejdStartup(FejdStartup fejd)
 		{
-			if (_initialized || fejd == null || fejd.m_objectDBPrefab == null)
-			{
+			if (initialized || fejd == null || fejd.m_objectDBPrefab == null)
 				return;
-			}
+			
 			try
 			{
 				ZNetScene component = fejd.m_objectDBPrefab.GetComponent<ZNetScene>();
-				if (component != null && TryInitFromArmorLeather(component))
-				{
-					_initialized = true;
-				}
+				if (component != null && FindTransparentInArmorLeather(component))
+					initialized = true;
 			}
-			catch (Exception arg)
+			catch (Exception ex)
 			{
-				Logger.Log($"FejdStartup bootstrap failed: {arg}");
+				Logger.LogError($"Error at BootstrapFromFejdStartup. {ex}");
 			}
 		}
 
 		private static void InitializeLazy()
 		{
-			if (!_initialized)
+			if (!initialized)
 			{
-				_initialized = true;
-				if (_template == null && !TryInitFromAnyStandardMaterial() && !TryInitFromAnyTransparentMaterial())
-				{
-					Logger.LogWarning("Could not find any suitable transparent template. Transparent culling will fall back to Hidden mode.");
-				}
+				initialized = true;
+				if (_template == null && !FindTransparentInAnyStandardMaterial() && !FindTransparentInTransparentMaterial())
+					Logger.LogWarning("Transparent template not found.");
 			}
 		}
 
-		private static bool TryInitFromArmorLeather(ZNetScene scene)
+		private static bool FindTransparentInArmorLeather(ZNetScene scene)
 		{
 			if (scene == null)
-			{
 				return false;
-			}
+			
 			string[] array = { "ArmorLeather", "ArmorLeatherChest", "ArmorLeatherLegs", "ArmorLeatherHelmet" };
 			foreach (string prefabName in array)
 			{
-				GameObject val = scene.m_prefabs.FirstOrDefault(x => x.name == prefabName);
-				if (val != null && TryBuildTemplateFromRenderers(val.GetComponentsInChildren<Renderer>(true)))
-				{
+				GameObject go = scene.m_prefabs.FirstOrDefault(x => x.name == prefabName);
+				if (go != null && HasTemplateInRendersList(go.GetComponentsInChildren<Renderer>(true)))
 					return true;
-				}
 			}
 			return false;
 		}
 
-		private static bool TryInitFromAnyStandardMaterial()
+		private static bool FindTransparentInAnyStandardMaterial()
 		{
 			try
 			{
-				Material[] array = Resources.FindObjectsOfTypeAll<Material>();
-				foreach (Material val in array)
+				Material[] materials = Resources.FindObjectsOfTypeAll<Material>();
+				foreach (Material material in materials)
 				{
-					if (val != null && val.shader != null && val.shader.name.Contains("Standard") && TryBuildTemplateFromMaterial(val, "Standard material '" + val.name + "'"))
-					{
+					if (material != null && material.shader != null && material.shader.name.Contains("Standard") && HasTemplateInMaterial(material, "Standard material '" + material.name + "'"))
 						return true;
-					}
 				}
 			}
-			catch (Exception arg)
+			catch (Exception ex)
 			{
-				Logger.Log($"Standard material scan failed: {arg}");
+				Logger.LogError($"Error in FindTransparentInAnyStandardMaterial. {ex}");
 			}
 			return false;
 		}
 
-		private static bool TryInitFromAnyTransparentMaterial()
+		private static bool FindTransparentInTransparentMaterial()
 		{
 			try
 			{
-				foreach (Material item in from m in Resources.FindObjectsOfTypeAll<Material>()
+				foreach (Material material in from m in Resources.FindObjectsOfTypeAll<Material>()
 					orderby m.renderQueue
 					select m)
 				{
-					if (item != null && item.HasProperty("_Color") && item.HasProperty("_MainTex") && item.renderQueue >= 3000 && TryBuildTemplateFromMaterial(item, "transparent material '" + item.name + "'"))
-					{
+					if (material != null && material.HasProperty("_Color") && material.HasProperty("_MainTex") && material.renderQueue >= 3000 && HasTemplateInMaterial(material, "transparent material '" + material.name + "'"))
 						return true;
-					}
 				}
 			}
-			catch (Exception arg)
+			catch (Exception ex)
 			{
-				Logger.Log($"Transparent material scan failed: {arg}");
+				Logger.LogError($"Error at FindTransparentInTransparentMaterial. {ex}");
 			}
 			return false;
 		}
 
-		private static bool TryBuildTemplateFromRenderers(IEnumerable<Renderer> renderers)
+		private static bool HasTemplateInRendersList(IEnumerable<Renderer> renderers)
 		{
 			foreach (Renderer renderer in renderers)
 			{
 				if (renderer == null)
-				{
 					continue;
-				}
+				
 				Material[] sharedMaterials = renderer.sharedMaterials;
 				if (sharedMaterials == null)
-				{
 					continue;
-				}
-				Material[] array = sharedMaterials;
-				foreach (Material val in array)
+				
+				Material[] materials = sharedMaterials;
+				foreach (Material material in materials)
 				{
-					if (val != null && val.shader != null && val.shader.name.Contains("Standard") && TryBuildTemplateFromMaterial(val, "ArmorLeather material '" + (val.name + "'")))
-					{
+					if (material != null && material.shader != null && material.shader.name.Contains("Standard") && HasTemplateInMaterial(material, "ArmorLeather material '" + (material.name + "'")))
 						return true;
-					}
 				}
 			}
 			return false;
 		}
 
-		private static bool TryBuildTemplateFromMaterial(Material source, string reason)
+		private static bool HasTemplateInMaterial(Material source, string reason)
 		{
 			if (source == null || source.shader == null)
-			{
 				return false;
-			}
-			Material val = new Material(source)
+			
+			Material material = new Material(source)
 			{
 				name = "ClearSight_TransparentTemplate"
 			};
-			if (val.HasProperty("_Mode") && val.HasProperty("_SrcBlend") && val.HasProperty("_DstBlend") && val.HasProperty("_ZWrite"))
+			if (material.HasProperty("_Mode") && material.HasProperty("_SrcBlend") && material.HasProperty("_DstBlend") && material.HasProperty("_ZWrite"))
 			{
-				val.SetFloat("_Mode", 2f);
-				val.SetInt("_SrcBlend", 5);
-				val.SetInt("_DstBlend", 10);
-				val.SetInt("_ZWrite", 0);
-				val.DisableKeyword("_ALPHATEST_ON");
-				val.EnableKeyword("_ALPHABLEND_ON");
-				val.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+				material.SetFloat("_Mode", 2f);
+				material.SetInt("_SrcBlend", 5);
+				material.SetInt("_DstBlend", 10);
+				material.SetInt("_ZWrite", 0);
+				material.DisableKeyword("_ALPHATEST_ON");
+				material.EnableKeyword("_ALPHABLEND_ON");
+				material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
 			}
-			val.renderQueue = 3000;
-			_template = val;
-			Logger.LogInfo("Using " + reason + " (shader '" + source.shader.name + "') as transparent template.");
+			material.renderQueue = 3000;
+			_template = material;
 			return true;
 		}
 	}
