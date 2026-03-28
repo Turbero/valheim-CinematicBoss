@@ -3,16 +3,9 @@ using BepInEx;
 using ServerSync;
 using System;
 using System.IO;
-using UnityEngine;
 
 namespace CinematicBoss
 {
-    public enum CullingVisualMode
-    {
-        Hidden,
-        Transparent
-    }
-    
     internal class ConfigurationFile
     {
         private static ConfigEntry<bool> _serverConfigLocked = null;
