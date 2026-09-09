@@ -58,7 +58,7 @@ namespace CinematicBoss
             int countBosses = EnemiesCounts.GetCountBossesAroundPlayer();
             if (countBosses > 0)
             {
-                Logger.Log("Same boss is already out. Skipping cutscene.");
+                Logger.Log("A boss is already out. Skipping cutscene.");
                 return;
             }
             
