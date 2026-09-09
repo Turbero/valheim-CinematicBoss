@@ -1,5 +1,10 @@
 ### CHANGELOG
 
+## 1.2.1
+
+* Recompiled for compatibility with 1.0
+* ServerSync upgrade
+
 ## 1.2.0
 
 * Added configurable transparency effects for bosses with obstacles around when invoking them in their altars.
