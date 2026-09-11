@@ -1,5 +1,9 @@
 ### CHANGELOG
 
+## 1.2.2
+
+* Fix to not trigger cinematic in the last boss altar outside (go there and check out by yourself why, no spoilers!)
+
 ## 1.2.1
 
 * Recompiled for compatibility with 1.0
