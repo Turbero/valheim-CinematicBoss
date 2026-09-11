@@ -62,7 +62,15 @@ namespace CinematicBoss
                 return;
             }
             
-            //Patch.StartCinematic(__instance.transform.position);
+            //Don't trigger cinematic for last vanilla boss in Deep North
+            Logger.Log("OfferingBowl name: " + __instance.name);
+            if (__instance.name.Equals("offeraltar_FrozenKing") &&
+                Player.m_localPlayer.GetCurrentBiome() == Heightmap.Biome.DeepNorth)
+            {
+                Logger.Log("Still not a boss. No cutscene!");
+                return;
+            }
+            
             Cutscene.StartCinematic(spawnPoint, __instance.m_bossPrefab.name);
 
             if (ConfigurationFile.playersNearbyCutscene.Value)
