@@ -62,12 +62,12 @@ namespace CinematicBoss
                 return;
             }
             
-            //Don't trigger cinematic for last vanilla boss in Deep North
+            //Don't trigger cinematic for Deep North altars and exceptions
+            List<string> dnAltarNames = new List<string> { "offeraltar_memorialsite", "offeraltar_FrozenKing" };
             Logger.Log("OfferingBowl name: " + __instance.name);
-            if (__instance.name.Equals("offeraltar_FrozenKing") &&
-                Player.m_localPlayer.GetCurrentBiome() == Heightmap.Biome.DeepNorth)
+            if (dnAltarNames.Contains(__instance.name) || ConfigurationFile.altarExceptionList.Value.Contains(__instance.name))
             {
-                Logger.Log("Still not a boss. No cutscene!");
+                Logger.Log(__instance.name + " doesn't apply for a cutscene. Skipping.");
                 return;
             }
             
