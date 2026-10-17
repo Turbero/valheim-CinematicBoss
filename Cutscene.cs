@@ -94,6 +94,7 @@ namespace CinematicBoss
             {
                 Hud.instance.gameObject.SetActive(hudWasVisible);
             }
+            GameObject.Find("MarketACCEPTEDquests(Clone)")?.SetActive(hide);
         }
 
         // --------------------------------------------------
