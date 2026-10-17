@@ -1,5 +1,11 @@
 ### CHANGELOG
 
+## 1.2.3
+
+* Fixed cutscene blocking players at Deep North altar for fallen warriors (use /remove_cutscene if trapped in general).
+* Added altar exclusion list names (not boss names) as option in .cfg to not trigger cutscene (typically "offeraltar_<something>" format). Example: offeraltar_deer to skip cutscene in Eikthyr
+* If any missions active from Marketplace mod, it will also be hidden now during cutscene.
+
 ## 1.2.2
 
 * Fix to not trigger cinematic in the last boss altar outside (go there and check out by yourself why, no spoilers!)
