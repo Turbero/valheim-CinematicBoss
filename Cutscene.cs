@@ -89,12 +89,14 @@ namespace CinematicBoss
             {
                 hudWasVisible = Hud.instance.gameObject.activeSelf;
                 Hud.instance.gameObject.SetActive(false);
+                if (ConfigurationFile.hideMissions.Value)
+                    GameObject.Find("MarketACCEPTEDquests(Clone)/UI/panel")?.SetActive(false);
             }
             else
             {
                 Hud.instance.gameObject.SetActive(hudWasVisible);
+                GameObject.Find("MarketACCEPTEDquests(Clone)/UI/panel")?.SetActive(true);
             }
-            GameObject.Find("MarketACCEPTEDquests(Clone)")?.SetActive(hide);
         }
 
         // --------------------------------------------------

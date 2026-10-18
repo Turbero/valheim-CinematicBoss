@@ -17,6 +17,7 @@ namespace CinematicBoss
         public static ConfigEntry<bool> lockPlayerDuringCutscene;
         public static ConfigEntry<bool> transparencyWhenInvokingBoss;
         public static ConfigEntry<string> altarExceptionList;
+        public static ConfigEntry<bool> hideMissions;
 
         public static ConfigEntry<string> transparencyWhenInvokingBossList;
         public static ConfigEntry<float> transparencyRadiusAreaEffect;
@@ -57,7 +58,8 @@ namespace CinematicBoss
                 lockPlayerDuringCutscene = config("2 - Cinematic Camera", "Player is locked during cutscene (true/false)", true, "Players cannot move during cutscene if true, otherwise they can move around but the camera will not be focused at them (default = true)");
                 transparencyWhenInvokingBoss = config("2 - Cinematic Camera", "Transparency in objects around boss altar when invoking", true, "Add a smooth transparency effect to surrounding objects when invoking a boss when they are an obstacle to see the boss appearing.");
                 altarExceptionList = config("2 - Cinematic Camera", "Altar Exception List", "", "Comma-separated list of altar prefab ids (not bosses names here) where the cutscene won't be applied.");
-                
+                hideMissions = config("2 - Cinematic Camera", "Hide Missions", true, "If on, missions panel will be hidden during cutscene (default = true).");
+
                 transparencyWhenInvokingBossList = config("2.1 - Transparency Effect", "Bosses to apply transparency", "Eikthyr,gd_king", "Comma-separated boss prefabId list to apply transparency effect during cutscene");
                 transparencyFadeAlpha = config("2.1 - Transparency Effect", "Transparency Fade Alpha", 0.20f, new ConfigDescription("Alpha value (0–1) used to apply transparency on objects during cutscene", new AcceptableValueRange<float>(0f, 1f)));
                 transparencyRadiusAreaEffect = config("2.1 - Transparency Effect", "Transparency Area Effect", 15f, "Radius of the sphere delimited between camera and player to find occluding pieces and apply transparency effect on them during cutscene");
