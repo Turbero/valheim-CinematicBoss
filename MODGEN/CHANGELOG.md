@@ -1,5 +1,10 @@
 ### CHANGELOG
 
+## 1.2.4
+
+* Fixed issue when hiding/showing missions after cutscene
+* Added option to enable/disable hiding missions during cutscene
+
 ## 1.2.3
 
 * Fixed cutscene blocking players at Deep North altar for fallen warriors (use /remove_cutscene if trapped in general).
