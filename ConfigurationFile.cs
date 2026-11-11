@@ -11,6 +11,7 @@ namespace CinematicBoss
         private static ConfigEntry<bool> _serverConfigLocked = null;
 
         public static ConfigEntry<bool> debug;
+        public static ConfigEntry<bool> removeCutsceneOnlyForAdmins;
 
         public static ConfigEntry<float> cameraGoesToBossDuration;
         public static ConfigEntry<bool> waitAtBossCameraPosition;
@@ -18,6 +19,7 @@ namespace CinematicBoss
         public static ConfigEntry<bool> transparencyWhenInvokingBoss;
         public static ConfigEntry<string> altarExceptionList;
         public static ConfigEntry<bool> hideMissions;
+        public static ConfigEntry<string> uiElemements;
 
         public static ConfigEntry<string> transparencyWhenInvokingBossList;
         public static ConfigEntry<float> transparencyRadiusAreaEffect;
@@ -52,6 +54,7 @@ namespace CinematicBoss
                 _serverConfigLocked = config("1 - General", "Lock Configuration", true, "If on, the configuration is locked and can be changed by server admins only.");
                 _ = ConfigSync.AddLockingConfigEntry(_serverConfigLocked);
                 debug = config("1 - General", "DebugMode", false, "Enabling/Disabling the debugging in the console (default = false)", false);
+                removeCutsceneOnlyForAdmins = config("1 - General", "Remove Cutscene Only For Admins", true, "Enabling/Disabling if /remove_cutscene can be used only for admins or not (default = true)");
                 
                 cameraGoesToBossDuration = config("2 - Cinematic Camera", "Camera goes from player to boss (seconds)", 10f, "Duration of the camera movement going to the boss position where it will appear in the world after the offering is done");
                 waitAtBossCameraPosition = config("2 - Cinematic Camera", "Camera waits at boss until he is fully out (true/false)", true, "Camera waits the necessary time at boss after he spawns before returning to the player (if false, just wait for one second after spawning)");
@@ -59,6 +62,7 @@ namespace CinematicBoss
                 transparencyWhenInvokingBoss = config("2 - Cinematic Camera", "Transparency in objects around boss altar when invoking", true, "Add a smooth transparency effect to surrounding objects when invoking a boss when they are an obstacle to see the boss appearing.");
                 altarExceptionList = config("2 - Cinematic Camera", "Altar Exception List", "", "Comma-separated list of altar prefab ids (not bosses names here) where the cutscene won't be applied.");
                 hideMissions = config("2 - Cinematic Camera", "Hide Missions", true, "If on, missions panel will be hidden during cutscene (default = true).");
+                uiElemements = config("2 - Cinematic Camera", "Hide UI Elements", "MarketACCEPTEDquests(Clone)/UI/panel,MarketplaceLeaderboardUI(Clone),MarketplaceDistanedUI(Clone)", "Comma-separated list of UI element game names to hide during cutscene typically from other mods.");
 
                 transparencyWhenInvokingBossList = config("2.1 - Transparency Effect", "Bosses to apply transparency", "Eikthyr,gd_king", "Comma-separated boss prefabId list to apply transparency effect during cutscene");
                 transparencyFadeAlpha = config("2.1 - Transparency Effect", "Transparency Fade Alpha", 0.20f, new ConfigDescription("Alpha value (0–1) used to apply transparency on objects during cutscene", new AcceptableValueRange<float>(0f, 1f)));

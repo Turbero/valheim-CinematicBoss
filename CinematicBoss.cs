@@ -48,7 +48,8 @@ namespace CinematicBoss
         {
             new Terminal.ConsoleCommand("remove_cutscene", "Rollback cutscene and move camera back to player", args =>
             {
-                if (Player.m_localPlayer && ModUtils.IsAdmin(Player.m_localPlayer))
+                if (Player.m_localPlayer == null) return;
+                if (!ConfigurationFile.removeCutsceneOnlyForAdmins.Value || ModUtils.IsAdmin(Player.m_localPlayer))
                     Cutscene.EndCinematic();
                 else 
                     Logger.LogWarning("Not enabled or not an admin to use this command!");
