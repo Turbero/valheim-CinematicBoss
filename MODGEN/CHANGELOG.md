@@ -1,5 +1,10 @@
 ### CHANGELOG
 
+## 1.2.5
+
+* Added config option to hide any UI game element from other mods to hide during cutscene if needed (it will be visible again automatically after cutscene)
+* Added config option to restrict /remove_cutscene only for admins (enabled by default)
+
 ## 1.2.4
 
 * Fixed issue when hiding/showing missions after cutscene
